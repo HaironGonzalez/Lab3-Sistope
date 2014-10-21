@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <time.h>
+#include <pthread.h>
 #include <vector>
 
 
@@ -28,8 +29,8 @@ typedef struct structurauser
   string pass;
 }user;
 
-
-void LeerDB(string NomDatabse,vector<user> &DB);
+int LeerDB(string NomDatabse,vector<user> &DB);
+void *Buscar();
 
 
 
