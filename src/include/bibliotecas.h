@@ -30,7 +30,7 @@ typedef struct structurauser
 }user;
 
 int LeerDB(string NomDatabse,vector<user> &DB);
-void *Buscar();
+void *Buscar(void * hola);
 
 
 

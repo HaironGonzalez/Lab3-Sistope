@@ -3,7 +3,6 @@
 
 int LeerDB(string NomDatabse,vector<user> &DB){
 
-
   ifstream file;
   file.open(NomDatabse.c_str());
   string  palabra;
@@ -24,7 +23,6 @@ int LeerDB(string NomDatabse,vector<user> &DB){
         //i++;
         getline(file,palabra);
         //cout << palabra<<endl;
-
         char c;
         string name;
         string pass;
@@ -32,13 +30,10 @@ int LeerDB(string NomDatabse,vector<user> &DB){
         while(c != ';'){
           c = file.get();      
           if(c == '\''){
-            
             for (int j = 0;j<3;j++){  // separa name y pass de una linea
-            
               while (c != '\''){
                 c = file.get();
               }
-
               if (c == '\'' && j == 0){
                 c = file.get();
                 while (c != '\''){
@@ -60,10 +55,7 @@ int LeerDB(string NomDatabse,vector<user> &DB){
                   c = file.get();
                 }
               }
-              
-              c = file.get();
-                
-              
+              c = file.get();  
             }
             //cout<< name<< "     "<<pass<<endl;
             aux.name = name;
@@ -82,5 +74,4 @@ int LeerDB(string NomDatabse,vector<user> &DB){
   //cout<< DB[cont-1].name<<"    "<<DB[cont-1].pass<<endl;
 return cont;
 }
-
 
