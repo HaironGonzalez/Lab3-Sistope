@@ -5,6 +5,7 @@ vector<user> DB;
 vector<string> Cache;
 bool LaEncontre = false;
 int indice = 0;
+
 pthread_mutex_t mutexsum;
 ofstream Resultado("./Resultado");
  
@@ -17,23 +18,27 @@ void * Buscar(void * param)
   cout << " Primero: "<<BloqueDic[0]<<"         ultimo: "<<BloqueDic[LargoBloque-1]<<endl;
 
   string PalabraDB = DB[indice].pass;
-  
+  int TamanoDB = DB.size(); 
   string Criptograma;
-  for(int i = 0;i<LargoBloque;i++){
-    Criptograma = md5(BloqueDic[i]);
-    if(Criptograma.compare(PalabraDB)==0){
-      cout << "LA ENCONTRE y es: "<<BloqueDic[i]<<endl;
-      Resultado << DB[indice].name <<" "<<BloqueDic[i]<<endl;
-      break; 
+  while(indice<TamanoDB){
+    int IndiceAux = indice;
+    for(int i = 0;i<LargoBloque;i++){
+
+      Criptograma = md5(BloqueDic[i]);
+      if(IndiceAux!=indice){
+        break;
+      }
+      
+      if(Criptograma.compare(DB[indice].pass)==0){
+        pthread_mutex_lock (&mutexsum);
+        cout << "LA ENCONTRE y es: "<<BloqueDic[i]<<endl;
+        Resultado << DB[indice].name <<" "<<BloqueDic[i]<<endl;
+        indice++;
+        pthread_mutex_unlock (&mutexsum);
+        break; 
+      }
     }
   }
-
-
-  pthread_mutex_lock (&mutexsum);
-  
-  pthread_mutex_unlock (&mutexsum);
-
-
   pthread_exit(NULL);
 }
 
