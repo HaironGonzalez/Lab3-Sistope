@@ -29,8 +29,27 @@ typedef struct structurauser
   string pass;
 }user;
 
+struct Tupla {
+   string encryptMD5;
+   string decryptMD5;
+   int frequency;
+};
+
+vector<user> DB;
+vector<string> Cache;
+bool LaEncontre = false;
+int indice = 0;
+int TamCache;
+
+pthread_mutex_t mutexsum;
+pthread_mutex_t mutexsum2;
+ofstream Resultado("./Resultado");
+ 
+vector<Tupla> tupla;
+
 int LeerDB(string NomDatabse,vector<user> &DB);
 void *Buscar(void * hola);
+
 
 
 

@@ -1,13 +1,48 @@
 #include "bibliotecas.h"
 #include "md5.h"
 
-vector<user> DB;
-vector<string> Cache;
-bool LaEncontre = false;
-int indice = 0;
 
-pthread_mutex_t mutexsum;
-ofstream Resultado("./Resultado");
+string BuscarCache(string encryptMD5){
+
+  //Si la tengo en mis registros
+  for(int i=0;i<tupla.size();i++){
+
+    if(tupla[i].encryptMD5.compare(encryptMD5)==0){
+
+      tupla[i].frequency++;
+      return tupla[i].decryptMD5;
+    }
+  }
+  return "1";
+}
+  
+void insert(string encryptMD5, string decryptMD5){
+               
+  if(tupla.size()<TamCache){
+    tupla.push_back(Tupla());
+    tupla[tupla.size()-1].encryptMD5 = encryptMD5;
+    tupla[tupla.size()-1].decryptMD5 = decryptMD5;
+    tupla[tupla.size()-1].frequency = 1;
+
+    return;
+  }
+
+
+  //Si no la tengo en mis registros, remplazo por la que tiene menor frencuencia (LFU)
+  int lowerFrequencyIndex = 0;
+
+  for(int i=0;i<tupla.size();i++){
+    if(tupla[i].frequency < tupla[lowerFrequencyIndex].frequency){
+            lowerFrequencyIndex == i;
+    }
+  }
+
+  tupla[lowerFrequencyIndex].encryptMD5 = encryptMD5;
+  tupla[lowerFrequencyIndex].decryptMD5 = decryptMD5;
+  tupla[lowerFrequencyIndex].frequency = 1;    
+  return;          
+}
+
  
 void * Buscar(void * param)
 {
@@ -15,37 +50,62 @@ void * Buscar(void * param)
   BloqueDic = *(vector<string>*) param;
   int LargoBloque= BloqueDic.size();
   
-  cout << " Primero: "<<BloqueDic[0]<<"         ultimo: "<<BloqueDic[LargoBloque-1]<<endl;
+  //cout << " Primero: "<<BloqueDic[0]<<"         ultimo: "<<BloqueDic[LargoBloque-1]<<endl;
 
   string PalabraDB = DB[indice].pass;
   int TamanoDB = DB.size(); 
   string Criptograma;
+  string result;
   while(indice<TamanoDB){
     int IndiceAux = indice;
-    for(int i = 0;i<LargoBloque;i++){
-
-      Criptograma = md5(BloqueDic[i]);
-      if(IndiceAux!=indice){
-        break;
-      }
+    pthread_mutex_lock (&mutexsum);
+    result = BuscarCache(DB[indice].pass);
+    //cout << "Resultado del cache es: "<<result<<endl;
+    if(result.compare("1")!=0){
       
-      if(Criptograma.compare(DB[indice].pass)==0){
+      //cout << "LA ENCONTRE y es(cache): "<<result<<endl;
+      Resultado << DB[indice].name <<" "<<result<<endl;
+      indice++;
+      result.clear();
+    }
+    pthread_mutex_unlock (&mutexsum);
+    if(result.compare("1")==0&&IndiceAux==indice) {
+
+      for(int i = 0;i<LargoBloque;i++){
+        
+        if(IndiceAux!=indice){
+          break;
+        }
+
+        Criptograma = md5(BloqueDic[i]);
+
+        string Comp;
         pthread_mutex_lock (&mutexsum);
-        cout << "LA ENCONTRE y es: "<<BloqueDic[i]<<endl;
-        Resultado << DB[indice].name <<" "<<BloqueDic[i]<<endl;
-        indice++;
+        if (indice<TamanoDB){
+          Comp = DB[indice].pass;
+        }
         pthread_mutex_unlock (&mutexsum);
-        break; 
+      
+
+        if(Criptograma.compare(Comp)==0){
+          pthread_mutex_lock (&mutexsum);
+          //cout << "LA ENCONTRE y es: "<<BloqueDic[i]<<endl;
+          Resultado << DB[indice].name <<" "<<BloqueDic[i]<<endl;
+          indice++;
+          insert(Criptograma,BloqueDic[i]);
+          pthread_mutex_unlock (&mutexsum);
+          break; 
+        }
       }
     }
   }
+  //cout << "terminooooooooo   la hebra\n";
   pthread_exit(NULL);
 }
 
 int main (int argc, char **argv)
 {
   int NumHebras;
-  int TamCache;
 
   string NomDicionario;
   char * NomDatabase = NULL;
@@ -97,19 +157,16 @@ int main (int argc, char **argv)
     } 
   }
 
-
-
-
   if (rflag && cflag  && dflag  && hflag && cont == 4)
   {
-    cout << "diccionario es: "<<NomDicionario<<endl;
-    cout << "Numero Hebras es: "<<NumHebras<<endl;
-    cout << "Nombre DB es: "<<NomDatabase<<endl;
-    cout << "Tamaño Cache es: "<<TamCache<<endl;
+    //cout << "diccionario es: "<<NomDicionario<<endl;
+    //cout << "Numero Hebras es: "<<NumHebras<<endl;
+    //cout << "Nombre DB es: "<<NomDatabase<<endl;
+    //cout << "Tamaño Cache es: "<<TamCache<<endl;
 
-    string md5t = "b0ar!$h";
-    md5t = md5(md5t);
-    cout << "Nom MD5: "<<md5t<<endl;
+    //string md5t = "b0ar!$h";
+    //md5t = md5(md5t);
+    //cout << "Nom MD5: "<<md5t<<endl;
 
     int NumUsuarios = LeerDB(NomDatabase,DB);
 
@@ -135,7 +192,7 @@ int main (int argc, char **argv)
     int NumPartes = Diccionario.size()/NumHebras;
     int Resto = Diccionario.size()%NumHebras;
 
-    cout<< "NumPalabras = "<< NumPalabras << "\n NumPartes = "<<NumPartes<<"\n Resto = "<<Resto<<endl;
+    //cout<< "NumPalabras = "<< NumPalabras << "\n NumPartes = "<<NumPartes<<"\n Resto = "<<Resto<<endl;
 
     //cout<<Diccionario[Diccionario.size()-1]<<endl;
     //for (int k=0;k<NumPalabras;k++)cout << Diccionario[k]<<"  ";
@@ -168,6 +225,7 @@ int main (int argc, char **argv)
     {
       pthread_create(&tid[i], &attr, Buscar, (void *)&BloquePalabras[i]);
     }
+
     for (int i = 0;i<NumHebras;i++)
     {
       pthread_join(tid[i], (void **)&status);
@@ -177,9 +235,10 @@ int main (int argc, char **argv)
   {
     cout << "Error Banderas"<< endl;
   }
-
+  //cout << "terminoooooooooo";
 
   pthread_mutex_destroy(&mutexsum);
+  Resultado.close();
   return 0;
 }
 

@@ -11,7 +11,7 @@ cxx:=g++
 includes:=-I./src/include 
 
 main: $(objects)
-	$(cxx) $(includes) $(objects) -o $(build)/laboratorio3 $(executable).cpp
+	$(cxx) $(includes) $(objects) -o $(build)/laboratorio3 $(executable).cpp -lpthread
 
 $(build)/%.o: $(src)/%.cpp 
 	test -d $(build) || mkdir $(build)
@@ -19,6 +19,3 @@ $(build)/%.o: $(src)/%.cpp
 
 clean:
 	rm $(build)/*;
-
-
-	
