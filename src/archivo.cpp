@@ -72,5 +72,5 @@ int LeerDB(string NomDatabse,vector<user> &DB){
   }
   //cout << " HAY "<<cont << "usuarios"<<endl;
   //cout<< DB[cont-1].name<<"    "<<DB[cont-1].pass<<endl;
-return cont;
+  return cont;
 }

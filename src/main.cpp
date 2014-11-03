@@ -1,10 +1,20 @@
 #include "bibliotecas.h"
 #include "md5.h"
 
+ vector<user> DB;
+ vector<string> Cache;
+
+ int indice;
+ int TamCache;
+
+ pthread_mutex_t mutexsum;
+ ofstream Resultado;
+ 
+ vector<Tupla> tupla;
 
 string BuscarCache(string encryptMD5){
 
-  //Si la tengo en mis registros
+
   for(int i=0;i<tupla.size();i++){
 
     if(tupla[i].encryptMD5.compare(encryptMD5)==0){
@@ -26,13 +36,11 @@ void insert(string encryptMD5, string decryptMD5){
     return;
   }
 
-
-  //Si no la tengo en mis registros, remplazo por la que tiene menor frencuencia (LFU)
   int lowerFrequencyIndex = 0;
 
   for(int i=0;i<tupla.size();i++){
     if(tupla[i].frequency < tupla[lowerFrequencyIndex].frequency){
-            lowerFrequencyIndex == i;
+      lowerFrequencyIndex == i;
     }
   }
 
@@ -46,6 +54,7 @@ void insert(string encryptMD5, string decryptMD5){
 void * Buscar(void * param)
 {
   vector <string> BloqueDic;
+  
   BloqueDic = *(vector<string>*) param;
   int LargoBloque= BloqueDic.size();
   
@@ -64,10 +73,13 @@ void * Buscar(void * param)
       
       //cout << "LA ENCONTRE y es(cache): "<<result<<endl;
       Resultado << DB[indice].name <<" "<<result<<endl;
+      //cout << DB[indice].name <<" "<<result<<endl;
       indice++;
       result.clear();
     }
+
     pthread_mutex_unlock (&mutexsum);
+
     if(result.compare("1")==0&&IndiceAux==indice) {
 
       for(int i = 0;i<LargoBloque;i++){
@@ -90,6 +102,7 @@ void * Buscar(void * param)
           pthread_mutex_lock (&mutexsum);
           //cout << "LA ENCONTRE y es: "<<BloqueDic[i]<<endl;
           Resultado << DB[indice].name <<" "<<BloqueDic[i]<<endl;
+          //cout << DB[indice].name <<" "<<BloqueDic[i]<<endl;
           indice++;
           insert(Criptograma,BloqueDic[i]);
           pthread_mutex_unlock (&mutexsum);
@@ -105,7 +118,8 @@ void * Buscar(void * param)
 int main (int argc, char **argv)
 {
   int NumHebras;
-
+  indice = 0;
+  Resultado.open("Resultado");
   string NomDicionario;
   char * NomDatabase = NULL;
 

@@ -1,6 +1,5 @@
-
-#ifndef __Laboratorio2__
-#define __Laboratorio2__
+#ifndef __Laboratorio3__
+#define __Laboratorio3__
 
 #include <iostream>
 #include <sstream>
@@ -35,17 +34,8 @@ struct Tupla {
    int frequency;
 };
 
-vector<user> DB;
-vector<string> Cache;
-bool LaEncontre = false;
-int indice = 0;
-int TamCache;
 
-pthread_mutex_t mutexsum;
-pthread_mutex_t mutexsum2;
-ofstream Resultado("./Resultado");
- 
-vector<Tupla> tupla;
+
 
 int LeerDB(string NomDatabse,vector<user> &DB);
 void *Buscar(void * hola);
@@ -53,4 +43,5 @@ void *Buscar(void * hola);
 
 
 
-#endif /* defined(__Laboratorio2__) */
+
+#endif /* defined(__Laboratorio3__) */
