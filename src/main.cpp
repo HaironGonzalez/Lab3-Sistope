@@ -8,7 +8,6 @@ string BuscarCache(string encryptMD5){
   for(int i=0;i<tupla.size();i++){
 
     if(tupla[i].encryptMD5.compare(encryptMD5)==0){
-
       tupla[i].frequency++;
       return tupla[i].decryptMD5;
     }
